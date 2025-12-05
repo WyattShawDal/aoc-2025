@@ -70,25 +70,38 @@ lol.
 
 so all but three numbers will be dropped, and need to be dropped in such a way as to minimize the best output
 
+current plan 
 
+Create number with the right most twelve digits, then iterate from the left most digit of that number to the left most digit of the bank
+checking if replacing that digit with any to the left of it creates a larger number, that location then becomes our bound for the next digit to the left
 
 """
-def max_jolts(bank:str) -> int:
-    r = 1 
-    l = 0
-    l = bank[l]
-    r = bank[r]
-    while r != len(bank):
-        if l < bank[r] and r < len(bank) -1:
-            l = r
-            l = bank[l]
-            #move r to the next value after l
-            r = bank[r+1]
-        elif bank[r] >= r:
-            r = bank[r]
-        r+=1
-    num = int(l + r)
-    return num
+def maxer_jolts(bank:str) -> int:
+    num = list(bank[len(bank) - 12:])
+    #we need to compare from the right most digit of bank
+    l_bound = 0#further left we can move the current digit
+    r_bound = len(bank) - 12#further right we can move the current digit
+    cnt = 0
+    for cnt in range(len(num)):
+        #needs to count from right bound down to l_bound
+        #need to include l_bound
+        best_idx = None
+        best_val = num[cnt]
+        for idx in range(r_bound - 1, l_bound - 1, -1):
+            if bank[idx] >= best_val:  
+                best_val = bank[idx]
+                best_idx = idx
+        if best_idx is not None:
+            num[cnt] = best_val
+            l_bound = best_idx + 1
+
+        r_bound += 1
+        if best_idx is None:
+            #no more larger left bound numbers, therefore we can just break
+            break
+
+    return int(''.join(num))
+
 
 def part1(banks :list[str]) -> int:
     password = 0
@@ -99,19 +112,16 @@ def part1(banks :list[str]) -> int:
 def part2(banks :list[str]) -> int:
     password = 0
     for bank in banks:
-        password += max_jolts(bank)
+        password += maxer_jolts(bank)
     return password
 
-
-
-def part2():
-    pass
 def main():
     with open("./inputs/day3", "r") as f:
         result = f.read()
     banks = result.split("\n")
     print(banks)
-    print(part1(banks))
+    # print(part1(banks))
+    print(part2(banks))
     pass
 
 if __name__ == "__main__":
